@@ -3,14 +3,11 @@ import { persist } from 'zustand/middleware';
 import { ZoomLevel } from '../utils/constants';
 
 interface UiState {
-  theme: 'light' | 'dark';
   detailPanelOpen: boolean;
   addTaskModalOpen: boolean;
   zoomLevel: ZoomLevel;
   sidebarWidth: number;
 
-  toggleTheme: () => void;
-  setTheme: (theme: 'light' | 'dark') => void;
   openDetailPanel: () => void;
   closeDetailPanel: () => void;
   openAddTaskModal: () => void;
@@ -22,32 +19,10 @@ interface UiState {
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      theme: 'light',
       detailPanelOpen: false,
       addTaskModalOpen: false,
       zoomLevel: 'week',
       sidebarWidth: 320,
-
-      toggleTheme: () =>
-        set(state => {
-          const next = state.theme === 'light' ? 'dark' : 'light';
-          // Apply to DOM
-          if (next === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
-          return { theme: next };
-        }),
-
-      setTheme: (theme) => {
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-        set({ theme });
-      },
 
       openDetailPanel: () => set({ detailPanelOpen: true }),
       closeDetailPanel: () => set({ detailPanelOpen: false }),
@@ -58,7 +33,7 @@ export const useUiStore = create<UiState>()(
     }),
     {
       name: 'bigpicture-ui',
-      partialize: (state) => ({ theme: state.theme, zoomLevel: state.zoomLevel, sidebarWidth: state.sidebarWidth }),
+      partialize: (state) => ({ zoomLevel: state.zoomLevel, sidebarWidth: state.sidebarWidth }),
     }
   )
 );

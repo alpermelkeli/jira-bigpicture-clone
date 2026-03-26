@@ -8,17 +8,8 @@ import { useUiStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
 
 export function AppLayout() {
-  const { theme, detailPanelOpen, addTaskModalOpen } = useUiStore();
+  const { detailPanelOpen, addTaskModalOpen } = useUiStore();
   const selectedTaskId = useTaskStore(s => s.selectedTaskId);
-
-  // Apply stored theme on mount
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
 
   // Open detail panel when a task is selected
   const { openDetailPanel, closeDetailPanel } = useUiStore();

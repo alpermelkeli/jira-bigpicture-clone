@@ -1,4 +1,4 @@
-import { ZoomIn, ZoomOut, Sun, Moon, Plus, Layout } from 'lucide-react';
+import { ZoomIn, ZoomOut, Plus, Layout } from 'lucide-react';
 import { useUiStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
 import { ZOOM_LEVELS, ZoomLevel } from '../../utils/constants';
@@ -10,7 +10,7 @@ const ZOOM_ICONS: Record<ZoomLevel, string> = {
 };
 
 export function Header() {
-  const { theme, toggleTheme, zoomLevel, setZoomLevel, openAddTaskModal } = useUiStore();
+  const { zoomLevel, setZoomLevel, openAddTaskModal } = useUiStore();
   const { tasks } = useTaskStore();
   const taskCount = Object.keys(tasks).length;
 
@@ -79,16 +79,6 @@ export function Header() {
         >
           <Plus size={14} />
           Add Task
-        </button>
-        <button
-          onClick={toggleTheme}
-          className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          title="Toggle theme"
-        >
-          {theme === 'light'
-            ? <Moon size={16} className="text-gray-600" />
-            : <Sun size={16} className="text-yellow-400" />
-          }
         </button>
       </div>
     </header>

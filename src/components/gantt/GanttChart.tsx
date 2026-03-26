@@ -1,5 +1,5 @@
 import { useRef, useMemo } from 'react';
-import { Gantt } from 'wx-react-gantt';
+import { Gantt, Willow } from 'wx-react-gantt';
 import 'wx-react-gantt/dist/gantt.css';
 import { useTaskStore } from '../../store/taskStore';
 import { useUiStore } from '../../store/uiStore';
@@ -17,7 +17,7 @@ function taskToGanttTask(task: Task) {
 
   return {
     id: task.id,
-    text: `[${task.issueKey}] ${task.summary}`,
+    text: task.summary,
     start,
     end,
     duration,
@@ -35,7 +35,7 @@ function taskToGanttTask(task: Task) {
 
 export function GanttChart() {
   const { tasks, links, selectedTaskId } = useTaskStore();
-  const { theme, zoomLevel } = useUiStore();
+  const { zoomLevel } = useUiStore();
 
   const apiRef = useRef<any>(null);
   useGanttEvents(apiRef);
@@ -46,22 +46,21 @@ export function GanttChart() {
   );
   const scales = SCALE_CONFIGS[zoomLevel] || SCALE_CONFIGS.week;
 
-  const wxThemeClass = theme === 'dark' ? 'wx-willow-dark-theme' : 'wx-willow-theme';
-
   return (
-    <div
-      className={`h-full w-full ${wxThemeClass}`}
-    >
-      <Gantt
-        api={apiRef}
-        tasks={ganttTasks}
-        links={links || []}
-        scales={scales}
-        columns={GANTT_COLUMNS}
-        selected={selectedTaskId ? [selectedTaskId] : []}
-        cellHeight={36}
-        scaleHeight={52}
-      />
+    <div className="h-full w-full">
+      <Willow>
+        <Gantt
+          api={apiRef}
+          tasks={ganttTasks}
+          links={links || []}
+          scales={scales}
+          columns={GANTT_COLUMNS}
+          editor={false}
+          selected={selectedTaskId ? [selectedTaskId] : []}
+          cellHeight={36}
+          scaleHeight={52}
+        />
+      </Willow>
     </div>
   );
 }

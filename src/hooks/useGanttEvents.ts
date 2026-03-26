@@ -6,6 +6,7 @@ import { toDateStr } from '../utils/dates';
 interface GanttApi {
   on: (event: string, handler: (data: any) => void) => () => void;
   exec: (event: string, data?: any) => void;
+  intercept: (event: string, handler: (data: any) => boolean) => () => void;
 }
 
 export function useGanttEvents(apiRef: MutableRefObject<GanttApi | null>) {
@@ -16,11 +17,6 @@ export function useGanttEvents(apiRef: MutableRefObject<GanttApi | null>) {
     const api = apiRef.current;
     if (!api) return;
 
-    // The API ref might be populated but the internal Svelte component
-    // might not have initialized the methods yet. We can check if calling
-    // a method throws or if we can add a small delay.
-    // Better: wrap in a try-catch or check if internal api is ready if we could.
-    // Since we can't easily check internal 'ws.api', we'll just be defensive.
 
     const unsubscribers: (() => void)[] = [];
 
@@ -39,6 +35,17 @@ export function useGanttEvents(apiRef: MutableRefObject<GanttApi | null>) {
       openDetailPanel();
     });
     if (unsub1) unsubscribers.push(unsub1);
+
+    // Prevent default editor popup by intercepting internal SVAR events
+    if (api.intercept) {
+      const unsubIntercept1 = api.intercept('show-editor', () => false); // Blocks default double-click editor
+      unsubscribers.push(unsubIntercept1);
+
+      // SVAR fires add-task when user presses Enter from the inline editor or clicks '+'.
+      // We block it entirely here because we have dedicated Add Task buttons.
+      const unsubIntercept2 = api.intercept('add-task', () => false);
+      unsubscribers.push(unsubIntercept2);
+    }
 
     // Task dates changed via drag/resize
     const unsub2 = safeOn('update-task', ({ id, task }: { id: string | number; task: any }) => {

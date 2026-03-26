@@ -1,0 +1,22 @@
+/* Base theme overrides */
+.wx-willow-theme {
+  --wx-color-primary: #0065FF;
+  --wx-color-primary-selected: #e6f0ff;
+  height: 100% !important;
+}
+
+/* Dark mode overrides — applied when html.dark is present */
+.dark .wx-willow-theme {
+  --wx-background: #1e2028;
+  --wx-background-alt: #252830;
+  --wx-background-hover: #2e3040;
+  --wx-color-font: #e2e8f0;
+  --wx-color-font-alt: #8892a4;
+  --wx-color-primary: #4C9AFF;
+  --wx-color-primary-selected: #1a2d4d;
+  --wx-border: 1px solid #2e3040;
+  --wx-table-border: 1px solid #2e3040;
+  --wx-table-header-background: #252830;
+  --wx-table-select-background: #1a2d4d;
+  --wx-icon-color: #8892a4;
+}

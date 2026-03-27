@@ -1,4 +1,3 @@
-import './styles/gantt-overrides.css';
 import { AppLayout } from './components/layout/AppLayout';
 
 function App() {

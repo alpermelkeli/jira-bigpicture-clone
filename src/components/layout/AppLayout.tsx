@@ -8,41 +8,48 @@ import { useUiStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
 
 export function AppLayout() {
-  const { detailPanelOpen, addTaskModalOpen } = useUiStore();
-  const selectedTaskId = useTaskStore(s => s.selectedTaskId);
+  const { theme, applyTheme, detailPanelOpen, addTaskModalOpen, openDetailPanel, closeDetailPanel } = useUiStore();
+  const selectedTaskId = useTaskStore((s) => s.selectedTaskId);
 
-  // Open detail panel when a task is selected
-  const { openDetailPanel, closeDetailPanel } = useUiStore();
+  // Apply persisted theme on mount
   useEffect(() => {
-    if (selectedTaskId) {
-      openDetailPanel();
-    } else {
-      closeDetailPanel();
-    }
+    applyTheme(theme);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Open/close detail panel based on selection
+  useEffect(() => {
+    if (selectedTaskId) openDetailPanel();
+    else closeDetailPanel();
   }, [selectedTaskId, openDetailPanel, closeDetailPanel]);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
-        {/* Main Gantt area */}
-        <div className="flex-1 overflow-hidden relative">
+
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Main Gantt */}
+        <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
           <GanttChart />
         </div>
 
         {/* Detail panel */}
         <div
-          className={`shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-all duration-300 overflow-y-auto ${
-            detailPanelOpen && selectedTaskId ? 'w-80' : 'w-0'
-          }`}
+          style={{
+            width: detailPanelOpen && selectedTaskId ? 320 : 0,
+            flexShrink: 0,
+            borderLeft: detailPanelOpen && selectedTaskId ? '1px solid var(--border)' : 'none',
+            background: 'var(--bg-panel)',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
         >
           {detailPanelOpen && selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} />}
         </div>
       </div>
 
-      {/* Add task modal */}
       {addTaskModalOpen && <TaskForm />}
-
       <Toaster position="bottom-right" richColors />
     </div>
   );

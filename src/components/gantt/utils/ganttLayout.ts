@@ -47,21 +47,41 @@ export function flattenTasks(
   return result;
 }
 
-/** Compute a comfortable date range that covers all tasks */
-export function getTimelineRange(tasks: Task[]): { start: Date; end: Date } {
+/** Minimum total range days per zoom level so the timeline never feels empty */
+const MIN_RANGE_DAYS: Record<ZoomLevel, number> = {
+  day: 90,   // ~3 months
+  week: 210, // ~7 months
+  month: 548, // ~18 months
+};
+
+/** Compute a comfortable date range that covers all tasks with a zoom-aware minimum */
+export function getTimelineRange(tasks: Task[], zoom: ZoomLevel = 'week'): { start: Date; end: Date } {
   const dates = tasks
     .flatMap((t) => [t.startDate, t.endDate])
     .filter((d): d is string => !!d)
     .map((d) => new Date(d));
 
+  const minDays = MIN_RANGE_DAYS[zoom];
+
   if (!dates.length) {
     const now = new Date();
-    return { start: addDays(now, -14), end: addDays(now, 90) };
+    return { start: addDays(now, -Math.floor(minDays / 4)), end: addDays(now, Math.ceil(minDays * 3 / 4)) };
   }
 
   const min = new Date(Math.min(...dates.map((d) => d.getTime())));
   const max = new Date(Math.max(...dates.map((d) => d.getTime())));
-  return { start: addDays(min, -14), end: addDays(max, 28) };
+
+  const padStart = addDays(min, -14);
+  const padEnd = addDays(max, 28);
+
+  // Ensure minimum range width
+  const currentDays = differenceInDays(padEnd, padStart);
+  if (currentDays < minDays) {
+    const extra = minDays - currentDays;
+    return { start: padStart, end: addDays(padEnd, extra) };
+  }
+
+  return { start: padStart, end: padEnd };
 }
 
 export function dateToX(date: Date, rangeStart: Date, pxPerDay: number): number {

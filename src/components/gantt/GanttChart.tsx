@@ -15,6 +15,8 @@ export function GanttChart() {
   const { zoomLevel } = useUiStore();
 
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [treeWidth, setTreeWidth] = useState(TREE_WIDTH);
+  const isResizing = useRef(false);
 
   const treeScrollRef = useRef<HTMLDivElement>(null);
   const timelineScrollRef = useRef<HTMLDivElement>(null);
@@ -22,14 +24,39 @@ export function GanttChart() {
 
   const pxPerDay = PX_PER_DAY[zoomLevel];
 
+  // ── Resize divider drag ──────────────────────────────────────────────────
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    const startX = e.clientX;
+    const startW = treeWidth;
+
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.max(200, Math.min(640, startW + ev.clientX - startX));
+      setTreeWidth(next);
+    };
+    const onUp = () => {
+      isResizing.current = false;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [treeWidth]);
+
   const flatTasks = useMemo(
     () => flattenTasks(tasks, collapsed),
     [tasks, collapsed]
   );
 
   const { start: rangeStart, end: rangeEnd } = useMemo(
-    () => getTimelineRange(Object.values(tasks)),
-    [tasks]
+    () => getTimelineRange(Object.values(tasks), zoomLevel),
+    [tasks, zoomLevel]
   );
 
   const totalDays = differenceInDays(rangeEnd, rangeStart) + 1;
@@ -102,6 +129,23 @@ export function GanttChart() {
         onSelect={handleSelect}
         scrollRef={treeScrollRef as React.RefObject<HTMLDivElement>}
         onScroll={handleTreeScroll}
+        width={treeWidth}
+      />
+
+      {/* ── Resize handle ──────────────────────────────────────── */}
+      <div
+        onMouseDown={startResize}
+        style={{
+          width: 5,
+          flexShrink: 0,
+          background: 'var(--border)',
+          cursor: 'col-resize',
+          position: 'relative',
+          zIndex: 10,
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--accent)')}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--border)')}
       />
 
       {/* ── Timeline panel ─────────────────────────────────────── */}

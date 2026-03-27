@@ -1,5 +1,5 @@
 import { ChevronRight, ChevronDown } from 'lucide-react';
-import { FlatTask, ROW_HEIGHT, HEADER_HEIGHT, TREE_WIDTH } from './utils/ganttLayout';
+import { FlatTask, ROW_HEIGHT, HEADER_HEIGHT } from './utils/ganttLayout';
 import { ISSUE_TYPE_COLORS, ISSUE_TYPE_LABELS, STATUS_COLORS, STATUS_LABELS } from '../../utils/constants';
 import { Task } from '../../types/task';
 
@@ -11,6 +11,7 @@ interface Props {
   onSelect: (id: string) => void;
   scrollRef: React.RefObject<HTMLDivElement>;
   onScroll: () => void;
+  width: number;
 }
 
 const ISSUE_TYPE_ICONS: Record<string, string> = {
@@ -57,13 +58,13 @@ function StatusPill({ status }: { status: Task['status'] }) {
   );
 }
 
-export function TaskTree({ flatTasks, collapsed, selectedId, onToggle, onSelect, scrollRef, onScroll }: Props) {
+export function TaskTree({ flatTasks, collapsed, selectedId, onToggle, onSelect, scrollRef, onScroll, width }: Props) {
   const totalHeight = flatTasks.length * ROW_HEIGHT;
 
   return (
     <div
       style={{
-        width: TREE_WIDTH,
+        width,
         display: 'flex',
         flexDirection: 'column',
         borderRight: '1px solid var(--border)',
